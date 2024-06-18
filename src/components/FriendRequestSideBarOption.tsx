@@ -1,0 +1,43 @@
+"use client";
+
+import { FC, useState } from "react";
+import Link from "next/link";
+import { Divide, User } from "lucide-react";
+
+interface FriendRequestSideBarOptionProps {
+  initialFriendRequestCount: number;
+  sessionId: string;
+}
+
+const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
+  initialFriendRequestCount,
+  sessionId,
+}) => {
+  const [unseenRequestCount, setUnseenRequestCount] = useState(
+    initialFriendRequestCount
+  );
+  // console.log(initialFriendRequestCount);
+
+  return (
+    <>
+      <Link
+        href={"/dashboard/requests"}
+        className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-3 rounded-md p-2 text-sm leading-6 font-semibold"
+      >
+        <span className="text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600 flex size-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white">
+          <User className="size-4" />
+        </span>
+
+        <span className="truncate">Friend Requests</span>
+
+        {unseenRequestCount > 0 ? (
+          <div className="size-5 rounded-full text-xs flex justify-center items-center text-white bg-indigo-600">
+            {unseenRequestCount}
+          </div>
+        ) : null}
+      </Link>
+    </>
+  );
+};
+
+export default FriendRequestSideBarOption;

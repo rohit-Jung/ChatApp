@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { messageValidator } from "@/lib/validations/messageValidator";
 import { ZodError } from "zod";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 export async function POST(req: Request) {
   try {
     const { text, chatId } = await req.json();
@@ -51,6 +53,18 @@ export async function POST(req: Request) {
     };
 
     const message = messageValidator.parse(messageData);
+
+    //trigger the pusher event for realtime messages
+    await pusherServer.trigger(
+      toPusherKey(`chat:${chatId}`),
+      "incoming_message",
+      message
+    );
+    await pusherServer.trigger(toPusherKey(`user:${friendId}:chats`), "new_chat", {
+      ...message,
+      senderImg: user.image,
+      senderName: user.name,
+    });
 
     await db.zadd(`chat:${chatId}:messages`, {
       score: timestamp,

@@ -1,26 +1,44 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, toPusherKey } from "@/lib/utils";
 import { Message } from "@/lib/validations/messageValidator";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import Image from "next/image";
+import { pusherClient } from "@/lib/pusher";
 
 interface MessagesProps {
   initialMessages: Message[];
   sessionId: string;
+  chatId: string;
   chatPartnerImg: string;
   sessionImg: string;
 }
 
 const Messages: FC<MessagesProps> = ({
   initialMessages,
+  chatId,
   sessionId,
   chatPartnerImg,
   sessionImg,
 }) => {
   const scrollDownRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+
+  useEffect(() => {
+    pusherClient.subscribe(toPusherKey(`chat:${chatId}`));
+
+    const handleIncomingMessage = (message: Message) => {
+      setMessages((prev) => [message, ...prev]);
+    };
+
+    pusherClient.bind("incoming_message", handleIncomingMessage);
+
+    return () => {
+      pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`));
+      pusherClient.unbind("incoming_message", handleIncomingMessage);
+    };
+  }, [chatId]);
 
   // console.log(chatPartnerImg, sessionImg);
   const formattedTimeStamp = (timeStamp: number) => {
@@ -36,11 +54,9 @@ const Messages: FC<MessagesProps> = ({
         <div ref={scrollDownRef} />
         {messages.map((message, index) => {
           const isCurrentUser = message.senderId === sessionId;
-          // console.log("Messages", messages);
           const hasNextMessage =
             messages[index - 1]?.senderId === messages[index].senderId;
 
-          console.log("isCUrrentUser", isCurrentUser);
           return (
             <div id="chat-message" key={`${message.id}-${message.timestamp}`}>
               <div
@@ -73,11 +89,14 @@ const Messages: FC<MessagesProps> = ({
                 </div>
 
                 <div
-                  className={cn("relative overflow-hidden rounded-full size-6", {
-                    "order-2": isCurrentUser,
-                    "order-1": !isCurrentUser,
-                    invisible: hasNextMessage,
-                  })}
+                  className={cn(
+                    "relative overflow-hidden rounded-full size-6",
+                    {
+                      "order-2": isCurrentUser,
+                      "order-1": !isCurrentUser,
+                      invisible: hasNextMessage,
+                    }
+                  )}
                 >
                   <Image
                     fill

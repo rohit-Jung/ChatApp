@@ -11,7 +11,7 @@ const DashBoard: FC<DashBoardProps> = async () => {
   console.log(session);
   return (
     <>
-      <div className="">{JSON.stringify(session)}</div>
+      <div className="">Dashboard</div>
     </>
   );
 };

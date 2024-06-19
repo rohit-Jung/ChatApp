@@ -1,8 +1,10 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Link from "next/link";
-import { Divide, User } from "lucide-react";
+import { User } from "lucide-react";
+import { pusherClient } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 interface FriendRequestSideBarOptionProps {
   initialFriendRequestCount: number;
@@ -17,6 +19,41 @@ const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
     initialFriendRequestCount
   );
   // console.log(initialFriendRequestCount);
+  useEffect(() => {
+    pusherClient.subscribe(
+      toPusherKey(`user:${sessionId}:incoming_friend_request`)
+    );
+    pusherClient.subscribe(toPusherKey(`user:${sessionId}:friends`));
+
+    const handleNewFriend = () => {
+      setUnseenRequestCount((prev) => prev - 1);
+    };
+
+    const handleDenyRequest = () => {
+      console.log("Request denied");
+      setUnseenRequestCount((prev) => prev - 1);
+    };
+
+    const handleIncomingFriendRequest = () => {
+      setUnseenRequestCount((prev) => prev + 1);
+    };
+    pusherClient.bind("incoming_friend_request", handleIncomingFriendRequest);
+    pusherClient.bind("new_friend", handleNewFriend);
+    pusherClient.bind("deny_request", handleDenyRequest);
+
+    //flush the event
+    return () => {
+      pusherClient.unsubscribe(
+        toPusherKey(`user:${sessionId}:incoming_friend_request`)
+      );
+      pusherClient.unbind(
+        "incoming_friend_request",
+        handleIncomingFriendRequest
+      );
+      pusherClient.unbind("new_friend", handleNewFriend);
+      pusherClient.unbind("deny_request", handleDenyRequest);
+    };
+  }, [sessionId]);
 
   return (
     <>

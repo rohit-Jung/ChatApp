@@ -11,6 +11,8 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { authOptions } from "../../auth/[...nextauth]/options";
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
@@ -66,6 +68,16 @@ export async function POST(req: Request) {
     }
 
     //valid request add the friend
+    //trigger the event to pusher Server for realtime notification
+
+    await pusherServer.trigger(
+      toPusherKey(`user:${friendId}:incoming_friend_request`),
+      "incoming_friend_request",
+      {
+        senderId: session.user.id,
+        senderEmail: session.user.email,
+      }
+    );
 
     await db.sadd(`user:${friendId}:incoming_friend_request`, session.user.id);
 

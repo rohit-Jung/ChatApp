@@ -39,10 +39,10 @@ const getChatMessages = async (chatId: string) => {
 
 const page: FC<pageProps> = async ({ params }) => {
   const { chatId } = params;
-  // console.log(chatId);
-
   const session = await getServerSession(authOptions);
   if (!session) return notFound();
+
+  // console.log("Is chat id changing ? ");
 
   const { user } = session;
 
@@ -87,10 +87,11 @@ const page: FC<pageProps> = async ({ params }) => {
           </div>
         </div>
         <Messages
+          chatId={chatId}
           initialMessages={initialMessages}
           sessionId={session.user.id}
           chatPartnerImg={chatPartner.image}
-          sessionImg={session.user.image}
+          sessionImg={session.user.image!}
         />
         <ChatInput chatId={chatId} chatPartner={chatPartner} />
       </div>

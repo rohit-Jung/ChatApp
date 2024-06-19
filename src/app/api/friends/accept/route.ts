@@ -8,6 +8,8 @@ import { ZodError, z } from "zod";
 import { authOptions } from "../../auth/[...nextauth]/options";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
@@ -47,12 +49,32 @@ export async function POST(req: Request) {
       });
     }
 
-    await db.sadd(`user:${validatedId.id}:friends`, session.user.id); //added the id as a friend
-    await db.sadd(`user:${session.user.id}:friends`, validatedId.id); //added the id as a friend in the current user
-    await db.srem(
-      `user:${session.user.id}:incoming_friend_request`,
-      validatedId.id
-    ); // removed the incoming request
+    const [userRaw, friendRaw] = (await Promise.all([
+      fetchRedis(`get`, `user:${session.user.id}`),
+      fetchRedis(`get`, `user:${validatedId.id}`),
+    ])) as [string, string];
+
+    const user = JSON.parse(userRaw) as User;
+    const friend = JSON.parse(friendRaw) as User;
+
+    await Promise.all([
+      pusherServer.trigger(
+        toPusherKey(`user:${session.user.id}:friends`),
+        "new_friend",
+        friend
+      ),
+      pusherServer.trigger(
+        toPusherKey(`user:${validatedId.id}:friends`),
+        "new_friend",
+        user
+      ),
+      db.sadd(`user:${validatedId.id}:friends`, session.user.id), //added the id as a friend
+      db.sadd(`user:${session.user.id}:friends`, validatedId.id), //added the id as a friend in the current user
+      db.srem(
+        `user:${session.user.id}:incoming_friend_request`,
+        validatedId.id
+      ), // removed the incoming request
+    ]);
 
     return new NextResponse("Friend added successfully", {
       status: 200,

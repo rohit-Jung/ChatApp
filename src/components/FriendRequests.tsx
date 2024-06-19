@@ -1,9 +1,11 @@
 "use client";
 
+import { pusherClient, pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 import axios from "axios";
 import { AwardIcon, Check, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 interface FriendRequestsProps {
@@ -13,10 +15,43 @@ interface FriendRequestsProps {
 
 const FriendRequests: FC<FriendRequestsProps> = ({
   incomingFriendRequests,
+  sessionId,
 }) => {
   const [friendRequests, setFriendRequests] = useState<IncomingFriendRequest[]>(
     incomingFriendRequests
   );
+
+  useEffect(() => {
+    pusherClient.subscribe(
+      toPusherKey(`user:${sessionId}:incoming_friend_request`)
+    );
+
+    const handleIncomingFriendRequest = ({
+      senderId,
+      senderEmail,
+    }: IncomingFriendRequest) => {
+      console.log("friend request received");
+      setFriendRequests((prev) => [
+        ...prev,
+        {
+          senderId,
+          senderEmail,
+        },
+      ]);
+    };
+    pusherClient.bind("incoming_friend_request", handleIncomingFriendRequest);
+
+    //flush the event
+    return () => {
+      pusherClient.unsubscribe(
+        toPusherKey(`user:${sessionId}:incoming_friend_request`)
+      );
+      pusherClient.unbind(
+        "incoming_friend_request",
+        handleIncomingFriendRequest
+      );
+    };
+  }, [sessionId]);
 
   const router = useRouter();
 
@@ -46,8 +81,7 @@ const FriendRequests: FC<FriendRequestsProps> = ({
       setFriendRequests(
         friendRequests.filter((request) => request.senderId !== senderId)
       );
-      toast.success("Successfully denied friend request");
-
+      toast.error("Friend request denied !!");
 
       router.refresh();
     } catch (error) {

@@ -6,6 +6,7 @@ import { IncomingMessage } from "http";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import UnseenChatCustomToast from "./UnseenChatCustomToast";
 
 interface SideBarChatsProps {
   friends: User[];
@@ -36,14 +37,22 @@ const SideBarChats: FC<SideBarChatsProps> = ({ friends, sessionId }) => {
 
       if (!shouldNotify) return;
 
-      toast(`New message from ${message.senderName.toLowerCase()}`);
+      // toast(`New message from ${message.senderName.toLowerCase()}`);
+      toast.custom((t) => (
+        <UnseenChatCustomToast
+          t={t}
+          sessionId={sessionId}
+          senderId={message.senderId}
+          senderImg={message.senderImg}
+          senderName={message.senderName}
+          senderMessage={message.text}
+        />
+      ));
 
       setUnseenMessages((prev) => [...prev, message]);
     };
 
     const handleNewAddedFriend = (user: User) => {
-      console.log("Added user: " + user);
-
       setActiveChats((prev) => [...prev, user]);
     };
 
@@ -58,7 +67,7 @@ const SideBarChats: FC<SideBarChatsProps> = ({ friends, sessionId }) => {
     };
   }, [sessionId, router, pathname]);
 
-  console.log("Active chats are", activeChats);
+  // console.log("Active chats are", activeChats);
 
   useEffect(() => {
     if (pathname.includes("chat")) {

@@ -69,6 +69,7 @@ export async function POST(req: Request) {
 
     //valid request add the friend
     //trigger the event to pusher Server for realtime notification
+    console.log("message channel triggered");
 
     await pusherServer.trigger(
       toPusherKey(`user:${friendId}:incoming_friend_request`),

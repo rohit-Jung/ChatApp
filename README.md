@@ -6,7 +6,7 @@
 
 # To Run this after cloning
 
-- replace the `.env.example` file with .env and write in your credentials
+- replace the `.env.example` file with .env.local and write in your credentials
 - then install the packages using `npm install` or yarn install
 - run the development server using `npm run dev` or `yarn dev`
 

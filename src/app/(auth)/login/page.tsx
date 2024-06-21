@@ -25,8 +25,8 @@ const Login: FC<LoginProps> = () => {
       <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full flex flex-col items-center max-w-md space-y-8">
           <div className="flex flex-col items-center gap-8">
-            <p>logo</p>
-            <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+            <p className="font-bold text-4xl">Chat app with Next</p>
+            <h2 className="mt-12 text-center text-xl font-bold tracking-tight text-gray-900">
               Sign In To your account{" "}
             </h2>
           </div>

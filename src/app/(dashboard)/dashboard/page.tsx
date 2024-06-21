@@ -9,9 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-interface DashBoardProps {
-  defaultValue: string;
-}
+interface DashBoardProps {}
 
 const DashBoard: FC<DashBoardProps> = async () => {
   const session = await getServerSession(authOptions);

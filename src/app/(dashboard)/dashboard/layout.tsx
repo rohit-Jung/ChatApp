@@ -5,7 +5,7 @@ import FriendRequestSideBarOption from "@/components/FriendRequestSideBarOption"
 import MobilePanel from "@/components/MobilePanel";
 import SideBarChats from "@/components/SideBarChats";
 import SignOutButton from "@/components/SignOutButton";
-import { Icon, Icons } from "@/components/icons";
+import { Icon, Icons } from "@/components/Icons";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,7 +43,6 @@ const layout: FC<layoutProps> = async ({ children }) => {
       `user:${session.user.id}:incoming_friend_request`
     )) as User[]
   ).length;
-
 
   return (
     <>

@@ -30,7 +30,6 @@ const SideBarChats: FC<SideBarChatsProps> = ({ friends, sessionId }) => {
     pusherClient.subscribe(toPusherKey(`user:${sessionId}:friends`));
 
     const handleNewChat = (message: ExtendedMessage) => {
-      console.log("New message: " + message);
       const shouldNotify =
         pathname !==
         `/dashboard/chat/${chatHrefConstructor(sessionId, message.senderId)}`;

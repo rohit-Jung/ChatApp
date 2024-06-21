@@ -2,6 +2,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { getFriendsByUserId } from "@/app/helpers/get-friends-by-user-id";
 import { fetchRedis } from "@/app/helpers/redis";
 import FriendRequestSideBarOption from "@/components/FriendRequestSideBarOption";
+import MobilePanel from "@/components/MobilePanel";
 import SideBarChats from "@/components/SideBarChats";
 import SignOutButton from "@/components/SignOutButton";
 import { Icon, Icons } from "@/components/icons";
@@ -43,12 +44,19 @@ const layout: FC<layoutProps> = async ({ children }) => {
     )) as User[]
   ).length;
 
-  console.log(unseenRequestCount);
 
   return (
     <>
-      <div className="w-full h-screen flex">
-        <div className="flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
+      <div className="w-full flex h-screen">
+        <div className="md:hidden">
+          <MobilePanel
+            friends={friends}
+            session={session}
+            sidebarOptions={sideBarOptions}
+            unseenRequestCount={unseenRequestCount}
+          />
+        </div>
+        <div className="hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
           <Link className="flex h-16 shrink-0 items-center" href={"/dashboard"}>
             <Icons.Logo className="h-8 w-auto text-indigo-600" />
           </Link>
@@ -111,7 +119,10 @@ const layout: FC<layoutProps> = async ({ children }) => {
                   <span className="sr-only">Your Profile</span>
                   <div className="flex flex-col">
                     <span aria-hidden="true">{session.user.name}</span>
-                    <span className="text-xs text-zinc-400" aria-hidden="true">
+                    <span
+                      className="text-xs text-zinc-400 truncate w-36"
+                      aria-hidden="true"
+                    >
                       {session.user.email}
                     </span>
                   </div>

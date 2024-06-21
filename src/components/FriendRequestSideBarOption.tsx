@@ -5,6 +5,8 @@ import Link from "next/link";
 import { User } from "lucide-react";
 import { pusherClient } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface FriendRequestSideBarOptionProps {
   initialFriendRequestCount: number;
@@ -18,8 +20,11 @@ const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
   const [unseenRequestCount, setUnseenRequestCount] = useState(
     initialFriendRequestCount
   );
-  // console.log(initialFriendRequestCount);
+  const pathname = usePathname();
+
   useEffect(() => {
+    const shouldNotify = pathname !== `/dashboard/chat/requests`;
+
     pusherClient.subscribe(
       toPusherKey(`user:${sessionId}:incoming_friend_request`)
     );
@@ -30,11 +35,13 @@ const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
     };
 
     const handleDenyRequest = () => {
-      console.log("Request denied");
       setUnseenRequestCount((prev) => prev - 1);
     };
 
     const handleIncomingFriendRequest = () => {
+      if (shouldNotify) {
+        toast("New Friend Request Received");
+      }
       setUnseenRequestCount((prev) => prev + 1);
     };
     pusherClient.bind("incoming_friend_request", handleIncomingFriendRequest);
@@ -46,6 +53,7 @@ const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
       pusherClient.unsubscribe(
         toPusherKey(`user:${sessionId}:incoming_friend_request`)
       );
+      pusherClient.unsubscribe(toPusherKey(`user:${sessionId}:friends`));
       pusherClient.unbind(
         "incoming_friend_request",
         handleIncomingFriendRequest
@@ -53,8 +61,9 @@ const FriendRequestSideBarOption: FC<FriendRequestSideBarOptionProps> = ({
       pusherClient.unbind("new_friend", handleNewFriend);
       pusherClient.unbind("deny_request", handleDenyRequest);
     };
-  }, [sessionId]);
+  }, [sessionId, pathname]);
 
+  // console.log("Unseen friend request", unseenRequestCount);
   return (
     <>
       <Link

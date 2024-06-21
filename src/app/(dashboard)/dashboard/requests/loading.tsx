@@ -6,7 +6,7 @@ interface loadingProps {}
 
 const loading: FC<loadingProps> = ({}) => {
   return (
-    <div className="w-full flex flex-col gap-3 pt-8 px-10 ml-2">
+    <div className="w-full flex flex-col gap-3 pt-20 px-10 ml-2 md:pt-8">
       <Skeleton className="mb-4" height={60} width={500} />
       <Skeleton height={50} width={350} />
       <Skeleton height={50} width={350} />
